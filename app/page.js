@@ -127,7 +127,7 @@ export default function Home() {
 
                 {/* Netlify Card */}
                 <a
-                  href="https://miguel-ai.netlify.app/"
+                  href="https://miguel-ai-2.netlify.app/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="group bg-white rounded-xl p-4 border border-teal-200 hover:border-teal-300 hover:shadow-lg transition-all duration-200 cursor-pointer">
@@ -202,3 +202,4 @@ export default function Home() {
     </div>
   );
 }
+
