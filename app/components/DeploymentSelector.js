@@ -29,7 +29,7 @@ const deployments = [
   },
   {
     name: 'GitHub',
-    url: 'https://miggyL.github.io/miguel-portfolio/',
+    url: 'https://miggyL.github.io/me/',
     color: 'bg-gray-700',
     textColor: 'text-gray-700'
   }
@@ -127,5 +127,6 @@ export default function DeploymentSelector() {
     </div>
   );
 }
+
 
 
