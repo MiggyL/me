@@ -148,7 +148,7 @@ export default function Avatar({ isSpeaking, videoToPlay, onVideoEnd, isAltAvata
       {/* Intro Video */}
       <video
         ref={introVideoRef}
-        className={`w-full h-full object-contain transition-opacity duration-300 ${showIntro ? 'opacity-100' : 'opacity-0'}`}
+        className="w-full h-full object-contain"
         onEnded={handleIntroEnd}
         onCanPlay={handleIntroReady}
         onLoadedData={handleIntroReady}
@@ -162,7 +162,7 @@ export default function Avatar({ isSpeaking, videoToPlay, onVideoEnd, isAltAvata
       {/* Idle Loop Video */}
       <video
         ref={idleVideoRef}
-        className={`w-full h-full object-contain transition-opacity duration-300 ${!showIntro && !isPlayingVideo ? 'opacity-100' : 'opacity-0'}`}
+        className="w-full h-full object-contain"
         loop
         muted
         preload="auto"
@@ -171,14 +171,14 @@ export default function Avatar({ isSpeaking, videoToPlay, onVideoEnd, isAltAvata
         onLoadedData={() => setIsIdleLoading(false)}
         disablePictureInPicture
         controlsList="nodownload nofullscreen noremoteplayback"
-        style={{ pointerEvents: 'none', display: !showIntro ? 'block' : 'none' }}
+        style={{ pointerEvents: 'none', display: !showIntro && !isPlayingVideo ? 'block' : 'none' }}
       />
 
       {/* Content Video Overlay */}
       {videoToPlay && (
         <video
           ref={videoRef}
-          className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${isContentReady ? 'opacity-100' : 'opacity-0'}`}
+          className="absolute inset-0 w-full h-full object-contain"
           onEnded={handleVideoEnd}
           onCanPlay={handleContentReady}
           onLoadedData={handleContentReady}
@@ -186,7 +186,7 @@ export default function Avatar({ isSpeaking, videoToPlay, onVideoEnd, isAltAvata
           playsInline
           disablePictureInPicture
           controlsList="nodownload nofullscreen noremoteplayback"
-          style={{ pointerEvents: 'none' }}
+          style={{ pointerEvents: 'none', display: isContentReady ? 'block' : 'none' }}
         />
       )}
 
