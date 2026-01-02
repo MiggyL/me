@@ -13,6 +13,7 @@ export default function Avatar({ isSpeaking, videoToPlay, onVideoEnd, isAltAvata
   const [isIdleLoading, setIsIdleLoading] = useState(true);
   const [isIntroLoading, setIsIntroLoading] = useState(false);
   const [isContentLoading, setIsContentLoading] = useState(false);
+  const [isContentReady, setIsContentReady] = useState(false);
 
   // Get video paths based on avatar type
   const getVideoPath = (videoName) => {
@@ -54,12 +55,7 @@ export default function Avatar({ isSpeaking, videoToPlay, onVideoEnd, isAltAvata
   };
 
   const playIntro = () => {
-    setShowIntro(true);
-    setIsIdle(false);
     setIsIntroLoading(true);
-    if (idleVideoRef.current) {
-      idleVideoRef.current.pause();
-    }
     if (introVideoRef.current) {
       // Update intro video source based on current avatar
       const newSrc = getVideoPath('Intro_Static');
@@ -73,23 +69,40 @@ export default function Avatar({ isSpeaking, videoToPlay, onVideoEnd, isAltAvata
   useEffect(() => {
     if (videoToPlay && videoRef.current) {
       setIsContentLoading(true);
-      setIsPlayingVideo(true);
-      setIsIdle(false);
-      setShowIntro(false); // Hide intro video
-      if (idleVideoRef.current) {
-        idleVideoRef.current.pause();
-      }
-      if (introVideoRef.current) {
-        introVideoRef.current.pause(); // Stop intro video if playing
-      }
+      setIsContentReady(false);
       videoRef.current.src = videoToPlay;
       videoRef.current.currentTime = 0;
+      videoRef.current.load();
       videoRef.current.play();
     }
   }, [videoToPlay]);
 
+  const handleContentReady = () => {
+    setIsContentLoading(false);
+    setIsContentReady(true);
+    setIsPlayingVideo(true);
+    setIsIdle(false);
+    setShowIntro(false);
+    if (idleVideoRef.current) {
+      idleVideoRef.current.pause();
+    }
+    if (introVideoRef.current) {
+      introVideoRef.current.pause();
+    }
+  };
+
+  const handleIntroReady = () => {
+    setIsIntroLoading(false);
+    setShowIntro(true);
+    setIsIdle(false);
+    if (idleVideoRef.current) {
+      idleVideoRef.current.pause();
+    }
+  };
+
   const handleVideoEnd = () => {
     setIsPlayingVideo(false);
+    setIsContentReady(false);
     setIsIdle(true);
     if (idleVideoRef.current) {
       idleVideoRef.current.play();
@@ -135,10 +148,11 @@ export default function Avatar({ isSpeaking, videoToPlay, onVideoEnd, isAltAvata
       {/* Intro Video */}
       <video
         ref={introVideoRef}
-        className={`w-full h-full object-contain transition-opacity duration-500 ${showIntro ? 'opacity-100' : 'opacity-0'}`}
+        className={`w-full h-full object-contain transition-opacity duration-300 ${showIntro ? 'opacity-100' : 'opacity-0'}`}
         onEnded={handleIntroEnd}
-        onCanPlay={() => setIsIntroLoading(false)}
-        onLoadedData={() => setIsIntroLoading(false)}
+        onCanPlay={handleIntroReady}
+        onLoadedData={handleIntroReady}
+        preload="auto"
         playsInline
         disablePictureInPicture
         controlsList="nodownload nofullscreen noremoteplayback"
@@ -148,9 +162,10 @@ export default function Avatar({ isSpeaking, videoToPlay, onVideoEnd, isAltAvata
       {/* Idle Loop Video */}
       <video
         ref={idleVideoRef}
-        className={`w-full h-full object-contain transition-opacity duration-500 ${!showIntro && !isPlayingVideo ? 'opacity-100' : 'opacity-0'}`}
+        className={`w-full h-full object-contain transition-opacity duration-300 ${!showIntro && !isPlayingVideo ? 'opacity-100' : 'opacity-0'}`}
         loop
         muted
+        preload="auto"
         playsInline
         onCanPlay={() => setIsIdleLoading(false)}
         onLoadedData={() => setIsIdleLoading(false)}
@@ -163,10 +178,11 @@ export default function Avatar({ isSpeaking, videoToPlay, onVideoEnd, isAltAvata
       {videoToPlay && (
         <video
           ref={videoRef}
-          className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-500 ${isPlayingVideo ? 'opacity-100' : 'opacity-0'}`}
+          className={`absolute inset-0 w-full h-full object-contain transition-opacity duration-300 ${isContentReady ? 'opacity-100' : 'opacity-0'}`}
           onEnded={handleVideoEnd}
-          onCanPlay={() => setIsContentLoading(false)}
-          onLoadedData={() => setIsContentLoading(false)}
+          onCanPlay={handleContentReady}
+          onLoadedData={handleContentReady}
+          preload="auto"
           playsInline
           disablePictureInPicture
           controlsList="nodownload nofullscreen noremoteplayback"
@@ -174,7 +190,7 @@ export default function Avatar({ isSpeaking, videoToPlay, onVideoEnd, isAltAvata
         />
       )}
 
-      {/* Loading Indicators */}
+      {/* Loading Indicator - Only show on initial page load */}
       {isIdleLoading && !showIntro && !isPlayingVideo && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
           <div className="flex flex-col items-center gap-3">
@@ -184,30 +200,6 @@ export default function Avatar({ isSpeaking, videoToPlay, onVideoEnd, isAltAvata
               <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{animationDelay: '0.2s'}}></div>
             </div>
             <span className="text-xs text-gray-600">Loading</span>
-          </div>
-        </div>
-      )}
-      {isIntroLoading && showIntro && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-          <div className="flex flex-col items-center gap-3">
-            <div className="flex gap-1">
-              <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce"></div>
-              <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{animationDelay: '0.1s'}}></div>
-              <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{animationDelay: '0.2s'}}></div>
-            </div>
-            <span className="text-xs text-gray-600">Loading video</span>
-          </div>
-        </div>
-      )}
-      {isContentLoading && isPlayingVideo && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-          <div className="flex flex-col items-center gap-3">
-            <div className="flex gap-1">
-              <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce"></div>
-              <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{animationDelay: '0.1s'}}></div>
-              <div className="w-2 h-2 rounded-full bg-gray-400 animate-bounce" style={{animationDelay: '0.2s'}}></div>
-            </div>
-            <span className="text-xs text-gray-600">Loading video</span>
           </div>
         </div>
       )}
