@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 
-export default function Avatar({ isSpeaking, videoToPlay, onVideoEnd, isAltAvatar, onAvatarSwitch }) {
+export default function Avatar({ isSpeaking, videoToPlay, onVideoEnd, isAltAvatar, onAvatarSwitch, language, onLanguageToggle }) {
   const videoRef = useRef(null);
   const idleVideoRef = useRef(null);
   const introVideoRef = useRef(null);
@@ -15,22 +15,24 @@ export default function Avatar({ isSpeaking, videoToPlay, onVideoEnd, isAltAvata
   const [isContentLoading, setIsContentLoading] = useState(false);
   const [isContentReady, setIsContentReady] = useState(false);
 
-  // Get video paths based on avatar type
+  // Get video paths based on avatar type and language
   const getVideoPath = (videoName) => {
-    const suffix = isAltAvatar ? 'ALT' : '';
-    return `/me/${videoName}${suffix}.mp4`;
+    const avatarSuffix = isAltAvatar ? '_real' : '';
+    // Idle videos don't have language versions
+    const langSuffix = (language === 'german' && videoName !== 'idle') ? '_de' : '';
+    return `/me/${videoName}${avatarSuffix}${langSuffix}.mp4`;
   };
 
   // Get poster image path based on avatar type
   const getPosterPath = () => {
-    const suffix = isAltAvatar ? '-alt' : '';
-    return `/me/idle-poster${suffix}.jpg`;
+    const suffix = isAltAvatar ? '_real' : '';
+    return `/me/poster${suffix}.jpg`;
   };
 
   useEffect(() => {
     if (idleVideoRef.current) {
       // Set initial source and check if video is already loaded
-      idleVideoRef.current.src = getVideoPath('Idle');
+      idleVideoRef.current.src = getVideoPath('idle');
       if (idleVideoRef.current.readyState >= 3) {
         setIsIdleLoading(false);
       }
@@ -42,7 +44,7 @@ export default function Avatar({ isSpeaking, videoToPlay, onVideoEnd, isAltAvata
   useEffect(() => {
     if (isIdle && idleVideoRef.current) {
       // Update the video source when avatar changes
-      const newSrc = getVideoPath('Idle');
+      const newSrc = getVideoPath('idle');
       if (idleVideoRef.current.src !== window.location.origin + newSrc) {
         idleVideoRef.current.src = newSrc;
         idleVideoRef.current.load();
@@ -64,7 +66,7 @@ export default function Avatar({ isSpeaking, videoToPlay, onVideoEnd, isAltAvata
     setIsIntroLoading(true);
     if (introVideoRef.current) {
       // Update intro video source based on current avatar
-      const newSrc = getVideoPath('Intro_Static');
+      const newSrc = getVideoPath('intro_static');
       introVideoRef.current.src = newSrc;
       introVideoRef.current.currentTime = 0;
       introVideoRef.current.load();
@@ -128,32 +130,65 @@ export default function Avatar({ isSpeaking, videoToPlay, onVideoEnd, isAltAvata
         className="absolute inset-0 w-full h-full object-contain"
       />
 
-      {/* Red Play Button - Bottom Center */}
+      {/* Control Buttons - Bottom Center */}
       {isIdle && (
         <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-20 flex items-center gap-3">
+          {/* Language Toggle Button */}
+          <button
+            onClick={onLanguageToggle}
+            className="group w-10 h-10 rounded-full shadow-lg overflow-hidden border border-white/50 transition-all duration-300 hover:scale-110 hover:bg-white/60 backdrop-blur-md bg-white/50"
+            aria-label={`Switch to ${language === 'english' ? 'German' : 'English'}`}
+            title={`Current language: ${language === 'english' ? 'English' : 'German'}`}
+          >
+            {language === 'english' ? (
+              // UK Flag
+              <svg viewBox="0 0 60 60" className="w-full h-full opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+                <defs>
+                  <clipPath id="uk-flag">
+                    <circle cx="30" cy="30" r="30"/>
+                  </clipPath>
+                </defs>
+                <g clipPath="url(#uk-flag)">
+                  <rect width="60" height="60" fill="#012169"/>
+                  <path d="M0,0 L60,60 M60,0 L0,60" stroke="#fff" strokeWidth="10"/>
+                  <path d="M0,0 L60,60 M60,0 L0,60" stroke="#C8102E" strokeWidth="6"/>
+                  <path d="M30,0 v60 M0,30 h60" stroke="#fff" strokeWidth="16"/>
+                  <path d="M30,0 v60 M0,30 h60" stroke="#C8102E" strokeWidth="10"/>
+                </g>
+              </svg>
+            ) : (
+              // German Flag
+              <div className="w-full h-full flex flex-col opacity-50 group-hover:opacity-100 transition-opacity duration-300">
+                <div className="h-1/3 bg-black"></div>
+                <div className="h-1/3 bg-[#DD0000]"></div>
+                <div className="h-1/3 bg-[#FFCE00]"></div>
+              </div>
+            )}
+          </button>
+
+          {/* Play Intro Button */}
           <button
             onClick={playIntro}
-            className="w-12 h-12 rounded-full bg-red-600 hover:bg-red-700 shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-110"
+            className="w-12 h-12 rounded-full bg-red-600/50 hover:bg-red-600/70 backdrop-blur-md shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 border border-red-400/50"
             aria-label="Play intro"
           >
-            <svg className="w-6 h-6 text-white ml-0.5" fill="currentColor" viewBox="0 0 20 20">
+            <svg className="w-6 h-6 text-white ml-0.5 drop-shadow-lg" fill="currentColor" viewBox="0 0 20 20">
               <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/>
             </svg>
           </button>
-          
+
+          {/* Avatar Switch Button */}
           <button
             onClick={onAvatarSwitch}
-            className={`w-10 h-10 rounded-full shadow-lg flex items-center justify-center transition-all duration-200 hover:scale-110 ${
-              isAltAvatar 
-                ? 'bg-blue-600 hover:bg-blue-700' 
-                : 'bg-gray-600 hover:bg-gray-700'
-            }`}
+            className="group w-10 h-10 rounded-full shadow-lg overflow-hidden border border-white/50 transition-all duration-300 hover:scale-110 hover:border-white/60 relative backdrop-blur-md bg-white/50"
             aria-label={`Switch to ${isAltAvatar ? 'default' : 'alternate'} avatar`}
-            title={`Currently: ${isAltAvatar ? 'Alternate' : 'Default'} Avatar`}
+            title={`Switch to ${isAltAvatar ? 'default' : 'alternate'} avatar`}
           >
-            <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd"/>
-            </svg>
+            <img
+              src={isAltAvatar ? '/me/face.jpg' : '/me/face_real.jpg'}
+              alt={`${isAltAvatar ? 'Default' : 'Alternate'} avatar`}
+              className="w-full h-full object-cover opacity-50 group-hover:opacity-100 transition-opacity duration-300"
+            />
           </button>
         </div>
       )}
