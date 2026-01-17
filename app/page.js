@@ -53,7 +53,7 @@ export default function Home() {
         {/* Avatar Card */}
         <div className="bg-white rounded-2xl p-6 border border-gray-200 shadow-sm relative">
           <QRCode />
-          <div className="grid md:grid-cols-3 gap-6 items-start">
+          <div className="grid md:grid-cols-3 gap-6 items-center">
             <div className="md:col-span-1">
               <div className="aspect-[2/3] rounded-xl overflow-hidden">
                 <Avatar
@@ -67,12 +67,12 @@ export default function Home() {
                 />
               </div>
             </div>
-            <div className="md:col-span-2 space-y-4">
-              <div>
+            <div className="md:col-span-2 flex flex-col justify-center space-y-4">
+              <div className="text-center">
                 <h2 className="text-2xl font-semibold text-gray-900">Miguel Lacanienta</h2>
                 <p className="text-gray-600 mt-1">BS Computer Science • AI Specialization • Mapúa University</p>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 justify-center">
                 <button
                   onClick={() => playVideo('objective')}
                   className="px-4 py-2 rounded-full bg-blue-50 text-blue-700 text-sm font-medium border border-blue-200 hover:bg-blue-100 hover:border-blue-300 transition-all duration-200 cursor-pointer">
@@ -103,12 +103,12 @@ export default function Home() {
               {/* Powered By Ticker */}
               <div className="bg-gray-800 rounded-lg overflow-hidden">
                 <div className="py-2 px-3">
-                  <div className="flex items-center gap-2 mb-1">
+                  <div className="flex items-center justify-center gap-2 mb-1">
                     <span className="text-white text-xs font-semibold">Powered by:</span>
                   </div>
                   <div className="relative overflow-hidden">
                     <div className="flex animate-scroll whitespace-nowrap">
-                      {/* First set of pills */}
+                      {/* First complete set */}
                       <div className="flex items-center gap-3 mr-6">
                         <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-700 rounded-full min-w-fit">
                           <img src="/chatgpt_icon.png" alt="ChatGPT" className="w-3.5 h-3.5 flex-shrink-0" />
@@ -171,7 +171,7 @@ export default function Home() {
                           <span className="text-white text-xs font-medium whitespace-nowrap">Kiro</span>
                         </div>
                       </div>
-                      {/* Duplicate set for continuous scroll */}
+                      {/* Duplicate set for seamless loop */}
                       <div className="flex items-center gap-3">
                         <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-700 rounded-full min-w-fit">
                           <img src="/chatgpt_icon.png" alt="ChatGPT" className="w-3.5 h-3.5 flex-shrink-0" />
